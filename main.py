@@ -2,6 +2,7 @@
 import logging
 from optimizer import Optimizer
 from tqdm import tqdm
+import tensorflow as tf
 
 # Setup logging.
 logging.basicConfig(
@@ -53,9 +54,16 @@ def generate(generations, population, nn_param_choices, dataset):
     optimizer = Optimizer(nn_param_choices)
     networks = optimizer.create_population(population)
 
+    tf.keras.utils.plot_model(
+        model, to_file='model.png', show_shapes=False, show_layer_names=True,
+        rankdir='TB', expand_nested=False, dpi=96)
+
+
     # Evolve the generation.
     for i in range(generations):
         logging.info("***Doing generation %d of %d***" %
+                     (i + 1, generations))
+        print("***Doing generation %d of %d***" %
                      (i + 1, generations))
 
         # Train and get accuracy for networks.
@@ -67,6 +75,8 @@ def generate(generations, population, nn_param_choices, dataset):
         # Print out the average accuracy each generation.
         logging.info("Generation average: %.2f%%" % (average_accuracy * 100))
         logging.info('-'*80)
+        print("Generation average: %.2f%%" % (average_accuracy * 100))
+        print('-'*80)
 
         # Evolve, except on the last iteration.
         if i != generations - 1:
@@ -94,7 +104,7 @@ def main():
     """Evolve a network."""
     generations = 10  # Number of times to evole the population.
     population = 20  # Number of networks in each generation.
-    dataset = 'cifar10'
+    dataset = 'mnist'
 
     nn_param_choices = {
         'nb_neurons': [64, 128, 256, 512, 768, 1024],
